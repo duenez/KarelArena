@@ -1,0 +1,66 @@
+# Hierarchical syntax
+ClassDeclaration        <- Spacing 'iniciar-programa' Spacing ClassBody Spacing 						        # Type 0
+								'finalizar-programa' Spacing EndOfFile
+ClassBody               <- MethodDeclaration* ConstructorDeclaration                                            # Type 1 
+
+MethodDeclaration       <- ResultType MethodDeclarator Spacing 'como' Spacing Statement                         # Type 2
+                                    
+ConstructorDeclaration  <- 'inicia-ejecucion' Spacing Statement* Spacing 'termina-ejecucion'                    # Type 3
+MethodDeclarator        <- Identifier FormalParameter                                                           # Type 4
+FormalParameter         <- ( OPEN Identifier? CLOSE )?                                                          # Type 5
+ResultType              <- 'define-nueva-instruccion' Spacing                                                   # Type 6
+OptionalArgument        <- OPEN IntExp? CLOSE                                                                   # Type 7
+
+#Statements
+Statement               <- Block / SEMICOLON / IfStatement / WhileStatement                                     # Type 8
+                            / IterateStatement / TurnoffStatement / TurnleftStatement
+                            / MoveStatement / PickbeeperStatement / PutbeeperStatement
+                            / ReturnStatement / CallStatement
+Block                   <- CURLYOPEN Statement* CURLYCLOSE                                                      # Type 9
+CallStatement           <- Identifier OptionalArgument? SEMICOLON                                               # Type 10
+IfStatement             <- 'si' Spacing Expression Spacing 'entonces' Spacing Statement                         # Type 11
+                            ( 'sino' Spacing Statement )?
+WhileStatement          <- 'mientras' Spacing Expression Spacing 'hacer' Spacing Statement                      # Type 12
+IterateStatement        <- 'repetir' Spacing IntExp Spacing 'veces' Spacing Statement                           # Type 13
+TurnoffStatement        <- 'apagate' Spacing SEMICOLON                                                          # Type 14
+ReturnStatement         <- 'sal-de-instruccion' Spacing SEMICOLON                                               # Type 15
+TurnleftStatement       <- 'gira-izquierda' Spacing SEMICOLON                                                   # Type 16
+MoveStatement           <- 'avanza' Spacing  SEMICOLON                                                          # Type 17
+PickbeeperStatement     <- 'coge-zumbador' Spacing SEMICOLON                                                    # Type 18
+PutbeeperStatement      <- 'deja-zumbador' Spacing SEMICOLON                                                    # Type 19
+
+#Boolean expressions
+Expression              <- AndClause ( OR AndClause )*                                                          # Type 20
+AndClause               <- NotClause ( AND NotClause )*                                                         # Type 21
+NotClause               <- NOT? AtomClause                                                                      # Type 22
+AtomClause              <- 'si-es-cero' Spacing OPEN IntExp CLOSE                                               # Type 23
+                            / BooleanFunction / OPEN Expression CLOSE
+BooleanFunction         <- ( 'frente-libre' / 'frente-bloqueado' / 'izquierda-libre'                            # Type 24
+                            / 'izquierda-bloqueada' / 'derecha-libre' / 'derecha-bloqueada'
+                            / 'junto-a-zumbador' / 'no-junto-a-zumbador'
+                            / 'algun-zumbador-en-la-mochila' / 'ningun-zumbador-en-la-mochila'
+                            / 'orientado-al-norte' / 'no-orientado-al-norte' / 'orientado-al-oeste'
+                            / 'no-orientado-al-oeste' / 'orientado-al-sur' / 'no-orientado-al-sur'
+                            / 'orientado-al-este' / 'no-orientado-al-este' )
+IntExp                  <- Decimal / 'precede' Spacing OPEN IntExp CLOSE               # Type 25
+                            / 'sucede' Spacing OPEN IntExp CLOSE / Identifier
+
+# Lexical syntax
+Identifier              <- '[a-zA-Z_][a-zA-Z\-_0-9]*' Spacing                       # Type 26
+Decimal                 <- ( '0' / '[1-9][0-9]*' ) Spacing                          # Type 27
+
+OR                      <- 'o' Spacing                                              # Type 28
+AND                     <- 'y' Spacing                                              # Type 29
+NOT                     <- 'no' Spacing                                             # Type 30
+SEMICOLON               <- ';' Spacing                                              # Type 31
+OPEN                    <- '\(' Spacing                                             # Type 32
+CLOSE                   <- '\)' Spacing                                             # Type 33
+CURLYOPEN               <- 'inicio' Spacing                                         # Type 34
+CURLYCLOSE              <- 'fin' Spacing                                            # Type 35
+
+Spacing                 <- (Space / Comment)*                                       # Type 36
+Comment                 <- '//' (!EndOfLine .)* EndOfLine                           # Type 37
+                            / '/\*' ( !'\*/' . )* ( '\*/' / EndOfFile )
+Space                   <- ' ' / '\t' / EndOfLine                                   # Type 38
+EndOfLine               <- '\r\n' / '\n' / '\r'                                     # Type 39
+EndOfFile               <- !.                                                       # Type 40
